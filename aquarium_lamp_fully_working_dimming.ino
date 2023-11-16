@@ -89,11 +89,18 @@ unsigned long secondsToMillis(int seconds) {
   return seconds * 1000;
 }
 
-int mapUnsignedLong(unsigned long value,
-                    unsigned long from_low, unsigned long from_high,
-                    int to_low, int to_high) {
+int mapLong(long value, long from_high, int to_low, int to_high) {
 
-    return to_low + (((value - from_low) / (from_high - from_low)) * (to_high - to_low));
+    // Serial.println("start");
+    // Serial.println(value-0);
+    // Serial.println(from_high);
+    // Serial.println(to_low);
+    // Serial.println(to_high-to_low);
+    // Serial.println(long(to_low) + (((long(value)) / (long(from_high))) * (long(to_high) - long(to_low))));
+    // Serial.println(long(to_low) + (((double(value)) / (double(from_high))) * (long(to_high) - long(to_low))));
+
+
+    return long(to_low) + (((double(value)) / (double(from_high))) * (long(to_high) - long(to_low)));
  
 }
 
@@ -117,12 +124,12 @@ int handle_dimming(int dimming_dur, bool before_or_after, int max_val=1000 ){
   // convert the dimming_dur parameter from seconds to milliseconds
   unsigned long dimming_duration = secondsToMillis(dimming_dur);
 
-  unsigned long dimming_end_time = dimming_start_time+dimming_duration
+  unsigned long dimming_end_time = dimming_start_time+dimming_duration;
 
    if (before_or_after) {
-        return mapUnsignedLong(time, 0, dimming_duration, max_val, 0)
+        return mapLong(time, dimming_duration, max_val, 0);
   } else {
-    return mapUnsignedLong(time, 0, dimming_duration, 0, max_val)
+    return mapLong(time, dimming_duration, 0, max_val);
   }
 
 }
@@ -155,13 +162,13 @@ int test12345(int hour_on, int min_on, int hour_off, int min_off, int hour_on1, 
     return brightness;
 
   } else if (time >= dimming_times[0] && time <= time_on_0) {
-    return handle_dimming(dimming, true, brightness);
+    return handle_dimming(dimming, false, brightness);
   } else if (time >= dimming_times[1] && time <= time_on_1) {
-    return handle_dimming(dimming, true, brightness);
+    return handle_dimming(dimming, false, brightness);
   } else if (time >= time_off_0 && time <= dimming_times[2]) {
-    return handle_dimming(dimming, false, brightness);
+    return handle_dimming(dimming, true, brightness);
   } else if (time >= time_off_1 && time <= dimming_times[3]) {
-    return handle_dimming(dimming, false, brightness);
+    return handle_dimming(dimming, true, brightness);
   } else
     is_dimming = false;
     return 0;
@@ -210,7 +217,7 @@ void loop() {
     case 3:
     case 4:
     case 5:
-      light_brightness_new = test12345(8, 0, 11, 15, 17, 0, 20, 30, { 0, 10, 0 }, current_time_val, 650); /*monday*/
+      light_brightness_new = test12345(8, 0, 11, 15,  17, 0, 20, 30, { 0, 10, 0 }, current_time_val, 650); /*monday*/
       break;
     // case 2:
     // light_brightness_new = test12345(7, 30, 11, 30, 17, 0, 21, 0, {0,20,0}, current_time_val, 700 ); /*tuesday*/   break;
