@@ -91,16 +91,16 @@ unsigned long secondsToMillis(int seconds) {
 
 int mapLong(long value, long from_high, int to_low, int to_high) {
 
-    // Serial.println("start");
-    // Serial.println(value-0);
-    // Serial.println(from_high);
-    // Serial.println(to_low);
-    // Serial.println(to_high-to_low);
-    // Serial.println(long(to_low) + (((long(value)) / (long(from_high))) * (long(to_high) - long(to_low))));
-    // Serial.println(long(to_low) + (((double(value)) / (double(from_high))) * (long(to_high) - long(to_low))));
+
+    if (long(value)* (long(to_high) - long(to_low)) < 5150){
+    return long(to_low) + (((double((long(value)* (long(to_high) - long(to_low)))/5150 )) / (double(long(from_high)/5150 ))));
+    }else{ return long(to_low) + (((double((long(value)* (long(to_high) - long(to_low))) )) / (double(long(from_high) ))));}
 
 
-    return long(to_low) + (((double(value)) / (double(from_high))) * (long(to_high) - long(to_low)));
+
+
+
+
  
 }
 
@@ -127,9 +127,9 @@ int handle_dimming(int dimming_dur, bool before_or_after, int max_val=1000 ){
   unsigned long dimming_end_time = dimming_start_time+dimming_duration;
 
    if (before_or_after) {
-        return mapLong(time, dimming_duration, max_val, 0);
+        return constrain(mapLong(time, dimming_duration, max_val, 0),0, max_val);
   } else {
-    return mapLong(time, dimming_duration, 0, max_val);
+    return constrain(mapLong(time, dimming_duration, 0, max_val),0, max_val);
   }
 
 }
@@ -174,11 +174,15 @@ int test12345(int hour_on, int min_on, int hour_off, int min_off, int hour_on1, 
     return 0;
 }
 void light_brightness(uint brightness) {
+  if(brightness >= 0){
   analogWrite(0, int(brightness * 1.023));
+  }
   // Serial.println(brightness);
 }
 
 void setup() {
+    light_brightness(0);
+
 #if !defined(EPOXY_DUINO)
   delay(1000);
 #endif
@@ -195,7 +199,7 @@ void setup() {
   // systemClock.setup();
   dsClock.setup();
   ntpClock.setup();
-
+ 
   // Creating timezones is cheap, so we can create them on the fly as needed.
   auto my_time_zone = TimeZone::forZoneInfo(&kZoneEurope_Amsterdam, &pacificProcessor);
 
@@ -204,6 +208,8 @@ void setup() {
   systemClock.setNow(pacificTime.toEpochSeconds());
 
   CoroutineScheduler::setup();
+    light_brightness(0);
+
 }
 int light_brightness_new = 0;
 int light_brightness_old = -1;
@@ -231,7 +237,7 @@ void loop() {
     // light_brightness_new = test12345(10, 0, 13, 0,  17, 0, 22, 0, {0,20,0}, current_time_val, 700 ); /*saturday*/   break;
     case 6:
     case 7:
-      light_brightness_new = test12345(10, 0, 13, 15, 17, 0, 20, 30, { 0, 10, 0 }, current_time_val, 650); /*sunday*/
+      light_brightness_new = test12345(10, 0, 13, 15, 17, 0, 20, 42, { 0, 10, 0 }, current_time_val, 650); /*sunday*/
       break;
   }
 
@@ -247,5 +253,6 @@ void loop() {
   // light_brightness(test12345(9, 30, 13, 30, 17,0,21,0,current_time_val ));
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("wifi");
+
   }
 }
