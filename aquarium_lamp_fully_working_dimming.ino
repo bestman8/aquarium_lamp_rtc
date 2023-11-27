@@ -58,7 +58,7 @@ void printCurrentTime() {
 COROUTINE(print) {
   COROUTINE_LOOP() {
     printCurrentTime();
-    COROUTINE_DELAY(2000);
+    COROUTINE_DELAY(45163);
   }
 }
 
